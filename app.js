@@ -11,7 +11,7 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
 
-mongoose.connect("mongodb+srv://admin-chirag:test123@cluster0-iekhj.mongodb.net/test?retryWrites=true&w=majority/todolistDB",{useNewUrlParser: true,useUnifiedTopology: true });
+mongoose.connect("mongodb+srv://admin-chirag:test123@cluster0-iekhj.mongodb.net/test?retryWrites=true&w=majority/todolistDB",{useNewUrlParser: true,useUnifiedTopology: true,useFindAndModify: false  });
 
 
 const itemsSchema={
@@ -124,7 +124,9 @@ app.get("/about", function(req, res){
 app.post("/deleted",function(req,res){
   const listName=req.body.listName;
   const checkedItemId=req.body.checkbox;
-  if(listName==="today"){
+  console.log(listName);
+  console.log(checkedItemId);
+  if(listName==="Today"){
   Item.deleteOne({_id: checkedItemId},function(err){
     if(err){
         console.log(err);
@@ -135,11 +137,16 @@ app.post("/deleted",function(req,res){
 })
 
   }else{
+    
     List.findOneAndUpdate({name:listName},{$pull:{items:{_id: checkedItemId}}},function(err,foundList){
       if(!err){
         res.redirect("/"+listName);
+      }else{
+        console.log("error occoured"+err);
       }
-    })
+      res.redirect("/"+listName);
+    });
+    
   }
 })
 let port= process.env.PORT;
